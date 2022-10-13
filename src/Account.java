@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 public class Account {
 
     private final List<Transaction> transactions;
@@ -25,10 +26,6 @@ public class Account {
         Account.interest = interest;
     }
 
-    private void setBalance(double balance) {
-        this.balance = balance;
-    }
-
     public List<Transaction> getTransactions() {
         return Collections.unmodifiableList(transactions);
     }
@@ -45,12 +42,12 @@ public class Account {
         return balance;
     }
 
-    public double getInterest() {
+    public static double getInterest() {
         return interest;
     }
 
     public void makeTransaction(double amount, String timestamp) {
-        if (balance - amount < 0){
+        if ((amount + balance) < 0){
             throw new IllegalArgumentException("Can't withdraw more then the account balance");
         }
         balance += amount;

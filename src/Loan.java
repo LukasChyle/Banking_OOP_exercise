@@ -73,7 +73,7 @@ public class Loan {
     }
 
     public void makeTransaction(double amount, String timestamp) {
-        if (this.amount - amount < 0){
+        if (this.amount + amount < 0){
             throw new IllegalArgumentException("Can't pay more then the current loan sum");
         } else if (amount <= 0) {
             throw new IllegalArgumentException("Can't withdraw money from the loan");

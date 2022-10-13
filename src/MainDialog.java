@@ -11,8 +11,8 @@ public class MainDialog {
         customerHandler = new CustomerHandler(data);
         employeeHandler = new EmployeeHandler(data);
 
-        String[] options = {"Add\nEmployee", "Add\nCustomer", "Manage\nEmployee", "Manage\nCustomer",
-                "List\nEmployees", "List\nCustomers", "Accounts:\nSet interest value"};
+        String[] options = {"Add Employee", "Add Customer", "Manage Employee", "Manage Customer",
+                "List Employees", "List Customers", "Accounts: change interest"};
         boolean run = true;
 
         while (run) {
@@ -143,9 +143,10 @@ public class MainDialog {
 
     private void setAccountInterest() {
         while(true) {
-            String input = JOptionPane.showInputDialog(null, "enter interest for all accounts in %");
+            String input = JOptionPane.showInputDialog(null,
+                    "Current interest " + (Account.getInterest()*100) + "%, set new interest in %");
             if (input == null) {
-                throw new IllegalArgumentException("canceled");
+                return;
             }
             try {
                 Account.setInterest(Double.parseDouble(input) / 100);
