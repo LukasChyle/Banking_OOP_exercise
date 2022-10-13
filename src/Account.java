@@ -61,6 +61,6 @@ public class Account {
 
     @Override
     public String toString() {
-        return "ID: " + accountID + ", owner: " + ownerPIN +"\nbalance: " + balance + ", interest: " + (interest*100) + "%" ;
+        return "  ID: " + accountID + " , owner: " + ownerPIN +" , balance: " + balance + " , interest: " + (interest*100) + "%  " ;
     }
 }

@@ -189,7 +189,7 @@ public class Data {
             JOptionPane.showMessageDialog(null, "there is no customers");
             return;
         }
-        JOptionPane.showMessageDialog(null, allCustomers.toString());
+        ScrollPaneMessage.printMessage(allCustomers.toString(), "All customers", 400);
     }
 
     public void printAllEmployees() {
@@ -201,7 +201,7 @@ public class Data {
             JOptionPane.showMessageDialog(null, "there is no employees");
             return;
         }
-        JOptionPane.showMessageDialog(null, allEmployees.toString());
+        ScrollPaneMessage.printMessage(allEmployees.toString(), "All employees", 400);
     }
 
     public double getAccountsSum(String pin){

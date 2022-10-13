@@ -6,6 +6,6 @@ public class Customer extends Person {
 
     @Override
     public String toString() {
-        return getFirstName() + " " + getLastName() + ", personal id number: " + getPIN();
+        return "  " + getFirstName() + " " + getLastName() + ", personal id number: " + getPIN();
     }
 }

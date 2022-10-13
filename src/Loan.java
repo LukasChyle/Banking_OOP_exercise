@@ -84,7 +84,7 @@ public class Loan {
 
     @Override
     public String toString() {
-        return "ID: " + loanID + ", owner: " + ownerPIN + ", granted by: " + grantedBy +
-                "\n amount: " + amount + ", interest: " + interest;
+        return "  ID: " + loanID + " , owner: " + ownerPIN + " , granted by: " + grantedBy +
+                " , amount: " + amount + " , interest: " + interest + "  ";
     }
 }

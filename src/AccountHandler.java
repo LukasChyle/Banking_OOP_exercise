@@ -58,7 +58,7 @@ public class AccountHandler {
 
     private void printTransactions(Account account) {
         List<Transaction> transactions = account.getTransactions();
-        StringBuilder sb = new StringBuilder().append("Transactions:\n");
+        StringBuilder sb = new StringBuilder();
         for (Transaction t : transactions) {
             sb.append(t).append("\n");
         }
@@ -66,6 +66,6 @@ public class AccountHandler {
             JOptionPane.showMessageDialog(null, "there is no transactions");
             return;
         }
-        JOptionPane.showMessageDialog(null, sb.toString());
+        ScrollPaneMessage.printMessage(sb.toString(), "All transactions", 300);
     }
 }
