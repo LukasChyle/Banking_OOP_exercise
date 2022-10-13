@@ -29,7 +29,7 @@ public class CustomerHandler {
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
 
             switch (action) {
-                case -1, 6 -> run = false;
+                case -1, 4 -> run = false;
                 case 0 -> createAccount(customer);
                 case 1 -> createLoan(customer);
                 case 2 -> getCustomerAccounts(customer);

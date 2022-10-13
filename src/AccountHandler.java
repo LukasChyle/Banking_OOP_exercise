@@ -7,7 +7,7 @@ public class AccountHandler {
     private final SimpleDateFormat sdf;
 
     public AccountHandler() {
-        sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+        sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm");
     }
 
     public void dialog(Account account) {

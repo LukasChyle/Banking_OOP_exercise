@@ -14,7 +14,7 @@ public class Data {
     private final SimpleDateFormat sdf;
 
     public Data() {
-        sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+        sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm");
         customers = new ArrayList<>();
         employees = new ArrayList<>();
         accounts = new ArrayList<>();
