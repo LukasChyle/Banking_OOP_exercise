@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -10,8 +11,10 @@ public class Data {
     private final List<Account> accounts;
     private final List<Loan> loans;
     private final Random rnd;
+    private final SimpleDateFormat sdf;
 
     public Data() {
+        sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
         customers = new ArrayList<>();
         employees = new ArrayList<>();
         accounts = new ArrayList<>();
@@ -51,13 +54,15 @@ public class Data {
 
     public String createAccount(Customer customer) throws IllegalArgumentException {
         String accountID = getNewAccountID();
-        accounts.add(new Account(accountID, customer.getPIN()));
+        java.util.Date date = new java.util.Date(); //updates the timeStamp
+        accounts.add(new Account(accountID, customer.getPIN(), sdf.format(date)));
         return accountID;
     }
 
     public String createLoan(Customer customer, double amount, double interest, Employee employee) throws IllegalArgumentException {
         String accountID = getNewAccountID();
-        loans.add(new Loan(accountID, customer.getPIN(), amount, interest, employee.getEmployeeID()));
+        java.util.Date date = new java.util.Date(); //updates the timeStamp
+        loans.add(new Loan(accountID, customer.getPIN(), amount, interest, employee.getEmployeeID(), sdf.format(date)));
         return accountID;
     }
 

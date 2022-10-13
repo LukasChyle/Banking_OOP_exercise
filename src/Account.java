@@ -8,10 +8,10 @@ public class Account {
     private final String accountID;
     private double balance;
     private static double interest;
-
     private final String ownerPIN;
+    private final String dateCreated;
 
-    public Account(String accountID, String ownerPIN) {
+    public Account(String accountID, String ownerPIN, String timestamp) {
         if (String.valueOf(accountID).length() != 8) {
             throw new IllegalArgumentException("account ID is not valid");
         } else if (String.valueOf(ownerPIN).length() != 11) {
@@ -20,6 +20,7 @@ public class Account {
         transactions = new ArrayList<>();
         this.accountID = accountID;
         this.ownerPIN = ownerPIN;
+        dateCreated = timestamp;
     }
 
     public static void setInterest(double interest) {
@@ -44,6 +45,10 @@ public class Account {
 
     public static double getInterest() {
         return interest;
+    }
+
+    public String getTimeCreated() {
+        return dateCreated;
     }
 
     public void makeTransaction(double amount, String timestamp) {

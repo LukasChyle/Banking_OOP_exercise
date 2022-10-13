@@ -7,7 +7,7 @@ public class AccountHandler {
     private final SimpleDateFormat sdf;
 
     public AccountHandler() {
-        sdf = new SimpleDateFormat("HH:mm:ss");
+        sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
     }
 
     public void dialog(Account account) {
@@ -44,15 +44,15 @@ public class AccountHandler {
             try {
                 if (deposit) {
                     account.makeTransaction(Double.parseDouble(input), sdf.format(date)); // adds
-                } else {
-                    account.makeTransaction(-Double.parseDouble(input), sdf.format(date)); // subtracts
+                    return;
                 }
+                account.makeTransaction(-Double.parseDouble(input), sdf.format(date)); // subtracts
+                return;
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "input not valid");
             } catch (IllegalArgumentException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e);
             }
-            return;
         }
     }
 

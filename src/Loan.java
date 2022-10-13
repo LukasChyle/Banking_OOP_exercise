@@ -12,7 +12,9 @@ public class Loan {
     private final List<Transaction> transactions;
     private final String ownerPIN;
 
-    public Loan(String loanID, String ownerPIN, double amount, double interest, String grantedBy) {
+    private final String dateCreated;
+
+    public Loan(String loanID, String ownerPIN, double amount, double interest, String grantedBy, String timestamp) {
         if (amount <= 0) {
             throw new IllegalArgumentException("loan amount can't be negative or zero");
         } else if (String.valueOf(loanID).length() != 8) {
@@ -29,6 +31,8 @@ public class Loan {
         this.amount = amount;
         this.interest = interest;
         this.grantedBy = grantedBy;
+        dateCreated = timestamp;
+        interestChanges.add(new InterestRateChange(interest, timestamp, grantedBy));
     }
 
     public List<InterestRateChange> getInterestChanges() {
@@ -59,12 +63,8 @@ public class Loan {
         return grantedBy;
     }
 
-    private void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    private void setInterest(double interest) {
-        this.interest = interest;
+    public String getDateCreated() {
+        return dateCreated;
     }
 
     public void makeInterestChange(double interest, String timestamp, String grantedBy) {
@@ -72,7 +72,7 @@ public class Loan {
         this.interest = interest;
     }
 
-    public void makeTransaction(double amount, String timestamp) {
+    public void makePayment(double amount, String timestamp) {
         if (this.amount + amount < 0){
             throw new IllegalArgumentException("Can't pay more then the current loan sum");
         } else if (amount <= 0) {
