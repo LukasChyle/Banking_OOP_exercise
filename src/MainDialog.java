@@ -1,15 +1,25 @@
 import javax.swing.*;
+import java.text.SimpleDateFormat;
 
 public class MainDialog {
 
-    private final Data data;
     private final CustomerHandler customerHandler;
     private final EmployeeHandler employeeHandler;
+    private final AccountHandler accountHandler;
+    private final LoanHandler loanHandler;
 
     public MainDialog() {
-        data = new Data();
-        customerHandler = new CustomerHandler(data);
-        employeeHandler = new EmployeeHandler(data);
+        CreatePIN createPIN = new CreatePIN();
+        CreateAccountID createID = new CreateAccountID();
+        ScrollPaneMessage spm = new ScrollPaneMessage();
+        Format format = new Format();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd '-' HH:mm");
+        CreateName setName = new CreateName();
+        customerHandler = new CustomerHandler(this, createPIN, spm, format, sdf, setName);
+        employeeHandler = new EmployeeHandler(this, createPIN, spm, format, sdf, setName);
+        accountHandler = new AccountHandler(this, createID, spm, sdf);
+        loanHandler = new LoanHandler(this, createID, spm, sdf);
+
 
         String[] options = {"Add Employee", "Add Customer", "Manage Employee", "Manage Customer",
                 "List Employees", "List Customers", "Accounts: change interest"};
@@ -21,140 +31,130 @@ public class MainDialog {
 
             switch (action) {
                 case -1 -> run = false;
-                case 0 -> createEmployee();
-                case 1 -> createCustomer();
+                case 0 -> employeeHandler.createEmployee();
+                case 1 -> customerHandler.createCustomer();
                 case 2 -> getEmployee();
                 case 3 -> getCustomer();
-                case 4 -> data.printAllEmployees();
-                case 5 -> data.printAllCustomers();
-                case 6 -> setAccountInterest();
+                case 4 -> employeeHandler.printAllEmployees();
+                case 5 -> customerHandler.printAllCustomers();
+                case 6 -> accountHandler.setAccountInterest();
             }
         }
         JOptionPane.showMessageDialog(null, "exit program");
     }
 
-    private void createEmployee() {
-        try {
-            String firstName = setName("first name");
-            String lastName = setName("last name");
-            String pin = setPIN(false);
-            double salary = setSalary();
-            data.createEmployee(firstName, lastName, pin, salary);
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(null, "employee was not created: " + e);
-        }
-    }
-
-    private void createCustomer() {
-        try {
-            String firstName = setName("first name");
-            String lastName = setName("last name");
-            String pin = setPIN(true);
-            data.createCustomer(firstName, lastName, pin);
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(null, "customer was not created: " + e);
-        }
-    }
-
-    private String setName(String type) {
-        while (true) {
-            String name = JOptionPane.showInputDialog(null, "enter " + type);
-            if (name == null) {
-                throw new IllegalArgumentException("canceled");
-            }
-            name = name.trim();
-            if (!name.chars().allMatch(Character::isLetter) || name.isBlank()) {
-                JOptionPane.showMessageDialog(null, type + " is not valid");
-                continue;
-            }
-            return name;
-        }
-    }
-
-    private String setPIN(boolean customer) {
-        while (true) {
-            String input = JOptionPane.showInputDialog(null, "enter 10 digit personal identity number");
-            if (input == null) {
-                throw new IllegalArgumentException("canceled");
-            }
-            input = input.trim();
-            if (input.length() == 10 && input.chars().allMatch(Character::isDigit)) {
-                input = input.substring(0, 6) + "-" + input.substring(6);
-            }
-            if (input.length() == 11 && input.substring(0, 6).chars().allMatch(Character::isDigit) &&
-                    input.charAt(6) == '-' && input.substring(7).chars().allMatch(Character::isDigit)) {
-                if (customer && data.getCustomerWithPIN(input) == null) {
-                    return input;
-                } else if (!customer && data.getEmployeeWithPIN(input) == null) {
-                    return input;
-                }
-                JOptionPane.showMessageDialog(null, "this personal identity number is already in use");
-                continue;
-            }
-            JOptionPane.showMessageDialog(null, "personal identity number is not valid");
-        }
-    }
-
-    private double setSalary() {
-        while (true) {
-            String salary = JOptionPane.showInputDialog(null, "enter monthly salary");
-            if (salary == null) {
-                throw new IllegalArgumentException("canceled");
-            }
-            salary = salary.trim();
-            if (salary.chars().allMatch(Character::isDigit) && !salary.isBlank() && Double.parseDouble(salary) != 0) {
-                return Double.parseDouble(salary);
-            }
-            JOptionPane.showMessageDialog(null, "salary is not valid");
-        }
-    }
-
     private void getEmployee() {
-        String input = JOptionPane.showInputDialog(null, "get employee by ID or personal id number");
-        if (input == null) {
-            return;
+        try {
+            Employee e = employeeHandler.getEmployee();
+            if (e != null) {
+                employeeDialog(e);
+            }
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "error: " + e);
         }
-        input = data.formatPIN(input);
-        input = data.formatID(input);
-        Employee e = data.getEmployeeWithID(input);
-        if (e == null) {
-            e = data.getEmployeeWithPIN(input);
-        }
-        if (e != null) {
-            employeeHandler.dialog(e);
-            return;
-        }
-        JOptionPane.showMessageDialog(null, "employee was not found");
+
     }
 
     private void getCustomer() {
-        String input = JOptionPane.showInputDialog(null, "get customer by personal id number");
-        if (input == null) {
-            return;
+        try {
+            Customer c = customerHandler.getCustomer();
+            if (c != null) {
+                customerDialog(c);
+            }
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "error: " + e);
         }
-        input = data.formatPIN(input);
-        Customer c = data.getCustomerWithPIN(input);
-        if (c != null) {
-            customerHandler.dialog(c);
-            return;
-        }
-        JOptionPane.showMessageDialog(null, "customer was not found");
     }
 
-    private void setAccountInterest() {
-        while(true) {
-            String input = JOptionPane.showInputDialog(null,
-                    "Current interest " + (Account.getInterest()*100) + "%, set new interest in %");
-            if (input == null) {
-                return;
-            }
-            try {
-                Account.setInterest(Double.parseDouble(input) / 100);
-                JOptionPane.showMessageDialog(null, "interest set to " + input + "%");
-                break;
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "interest input not valid");
+    private void customerDialog(Customer customer) {
+        String[] options = {"Create account", "Create loan", "Manage account", "Manage loan", "Return"};
+        boolean run = true;
+
+        while (run) {
+            String message = customer + "\nAccounts: " + accountHandler.getNumberOfAccountsPIN(customer.getPIN()) +
+                    " , Sum of balance: " + accountHandler.getAccountsSum(customer.getPIN()) +
+                    "\nLoans: " + loanHandler.getNumberOfLoansPIN(customer.getPIN()) +
+                    " , Sum of loan: " + loanHandler.getLoansSum(customer.getPIN());
+
+            int action = JOptionPane.showOptionDialog(null, message, "Customer",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
+
+            switch (action) {
+                case -1, 4 -> run = false;
+                case 0 -> accountHandler.createAccount(customer);
+                case 1 -> loanHandler.createLoan(customer);
+                case 2 -> accountHandler.getCustomerAccounts(customer);
+                case 3 -> loanHandler.getCustomerLoans(customer);
             }
         }
+    }
+
+
+    private void employeeDialog(Employee employee){ // not done
+
+        String[] options = {"Change salary", "Loans granted", };
+        String message = employee + "\nSalary: " + employee.getSalary();
+        boolean run = true;
+
+        while (run) {
+            int action = JOptionPane.showOptionDialog(null, message, "Employee",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
+
+            switch (action) {
+                case -1, 6 -> run = false;
+
+            }
+        }
+    }
+
+    public void accountDialog(Account account) {
+        String[] options = {"Deposit", "Withdraw", "Transactions", "Return"};
+        boolean run = true;
+
+        while (run) {
+            int action = JOptionPane.showOptionDialog(null, account, "Account",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
+
+            switch (action) {
+                case -1, 3 -> run = false;
+                case 0 -> accountHandler.makeTransaction(account, true);
+                case 1 -> accountHandler.makeTransaction(account, false);
+                case 2 -> accountHandler.printTransactions(account);
+            }
+        }
+    }
+
+    public void loanDialog(Loan loan) {
+        String[] options = {"Make payment", "Change Interest", "Payment history", "Interest history", "Return"};
+        boolean run = true;
+
+        while (run) {
+            int action = JOptionPane.showOptionDialog(null, loan, "Loan",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
+
+            switch (action) {
+                case -1, 4 -> run = false;
+                case 0 -> loanHandler.makePayment(loan);
+                case 1 -> loanHandler.setNewInterest(loan);
+                case 2 -> loanHandler.printPayments(loan);
+                case 3 -> loanHandler.printInterestChanges(loan);
+            }
+        }
+    }
+
+    public CustomerHandler getCustomerHandler() {
+        return customerHandler;
+    }
+
+    public EmployeeHandler getEmployeeHandler() {
+        return employeeHandler;
+    }
+
+    public AccountHandler getAccountHandler() {
+        return accountHandler;
+    }
+
+    public LoanHandler getLoanHandler() {
+        return loanHandler;
     }
 }

@@ -3,8 +3,8 @@ public class Employee extends Person {
     private double salary;
     private final String employeeID;
 
-    public Employee(String firstName, String lastName, String pin, double salary, String employeeID) {
-        super(firstName, lastName, pin);
+    public Employee(String firstName, String lastName, String pin, String timestamp, double salary, String employeeID) {
+        super(firstName, lastName, pin, timestamp);
         if (salary <= 0) {
             throw new IllegalArgumentException("salary can't be negative");
         } else if (employeeID.length() != 7) {
@@ -31,6 +31,7 @@ public class Employee extends Person {
 
     @Override
     public String toString() {
-        return "  " + getFirstName() + " " + getLastName() + ", personal id number: " + getPIN() + ", ID: " + employeeID;
+        return "  " + getFirstName() + " " + getLastName() +
+                ", personal id number: " + getPIN() + ", ID: " + employeeID + " , created: " + getDateCreated();
     }
 }

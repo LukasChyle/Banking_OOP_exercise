@@ -52,7 +52,7 @@ public class Account {
     }
 
     public void makeTransaction(double amount, String timestamp) {
-        if ((amount + balance) < 0){
+        if ((amount + balance) < 0) {
             throw new IllegalArgumentException("Can't withdraw more then the account balance");
         }
         balance += amount;
@@ -61,6 +61,7 @@ public class Account {
 
     @Override
     public String toString() {
-        return "  ID: " + accountID + " , owner: " + ownerPIN +" , balance: " + balance + " , interest: " + (interest*100) + "%  " ;
+        return "  ID: " + accountID + " , owner: " + ownerPIN + " , balance: " + balance +
+                " , interest: " + (interest * 100) + "% , created: " + dateCreated + "  ";
     }
 }

@@ -2,9 +2,11 @@ public abstract class Person {
 
     private final String firstName;
     private final String lastName;
-    private final String pin; // Social security number
+    private final String pin; // personal identity number
+    private final String dateCreated;
 
-    public Person(String firstName, String lastName, String pin) {
+
+    public Person(String firstName, String lastName, String pin, String timestamp) {
         if (firstName.isBlank() || lastName.isBlank()){
             throw new IllegalArgumentException("first name/surname can't be blank");
         } else if (String.valueOf(pin).length() != 11) {
@@ -13,6 +15,7 @@ public abstract class Person {
         this.firstName = firstName;
         this.lastName = lastName;
         this.pin = pin;
+        this.dateCreated = timestamp;
     }
 
     public String getFirstName() {
@@ -25,5 +28,9 @@ public abstract class Person {
 
     public String getPIN() {
         return pin;
+    }
+
+    public String getDateCreated() {
+        return dateCreated;
     }
 }

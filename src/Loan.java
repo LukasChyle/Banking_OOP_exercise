@@ -73,18 +73,18 @@ public class Loan {
     }
 
     public void makePayment(double amount, String timestamp) {
-        if (this.amount + amount < 0){
+        if ((this.amount + amount) < 0) {
             throw new IllegalArgumentException("Can't pay more then the current loan sum");
         } else if (amount <= 0) {
             throw new IllegalArgumentException("Can't withdraw money from the loan");
         }
         transactions.add(new Transaction(amount, timestamp));
-        this.amount += amount;
+        this.amount -= amount;
     }
 
     @Override
     public String toString() {
         return "  ID: " + loanID + " , owner: " + ownerPIN + " , granted by: " + grantedBy +
-                " , amount: " + amount + " , interest: " + interest + "  ";
+                " , amount: " + amount + " , interest: " + (interest * 100) + " , created: " + dateCreated + "  ";
     }
 }
