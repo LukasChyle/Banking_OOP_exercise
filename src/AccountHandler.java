@@ -5,14 +5,27 @@ import java.util.List;
 
 public class AccountHandler {
 
-    private final List<Account> accounts;
+    private List<Account> accounts;
     private final MainDialog mainDialog;
     private final SimpleDateFormat sdf;
 
     public AccountHandler(MainDialog mainDialog, SimpleDateFormat sdf) {
         accounts = new ArrayList<>();
+        retrieveList();
         this.mainDialog = mainDialog;
         this.sdf = sdf;
+    }
+
+    private void storeList() {
+        ObjectFileStore.storeObjects(accounts, "accounts");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void retrieveList() {
+        List<Account> accountList = (List<Account>) ObjectFileStore.retrieveObjects("accounts");
+        if (accountList != null) {
+            accounts = accountList;
+        }
     }
 
     public void getCustomerAccounts(Customer customer) {
@@ -48,6 +61,7 @@ public class AccountHandler {
         String accountID = CreateAccountID.setID(mainDialog.getAccountHandler(), mainDialog.getLoanHandler());
         java.util.Date date = new java.util.Date();
         accounts.add(new Account(accountID, customer.getPIN(), sdf.format(date)));
+        storeList();
         return accountID;
     }
 
@@ -143,6 +157,7 @@ public class AccountHandler {
             }
             try {
                 Account.setInterest(Double.parseDouble(input) / 100);
+                storeList();
                 JOptionPane.showMessageDialog(null, "interest set to " + input + "%");
                 break;
             } catch (NumberFormatException e) {

@@ -1,4 +1,6 @@
-public record InterestRateChange(double interest, String timestamp, String grantedBy) {
+import java.io.Serializable;
+
+public record InterestRateChange(double interest, String timestamp, String grantedBy) implements Serializable {
 
     @Override
     public String toString() {

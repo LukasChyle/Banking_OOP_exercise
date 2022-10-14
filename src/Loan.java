@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Loan {
+public class Loan implements Serializable {
 
     private final String loanID;
     private double amount;
