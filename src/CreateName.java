@@ -2,7 +2,7 @@ import javax.swing.*;
 
 public class CreateName {
 
-    public String setName(String type) {
+    public static String setName(String type) {
         while (true) {
             String name = JOptionPane.showInputDialog(null, "enter " + type);
             if (name == null) {

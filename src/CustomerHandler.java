@@ -7,28 +7,20 @@ public class CustomerHandler {
 
     private final List<Customer> customers;
     private final MainDialog dialog;
-    private final CreatePIN pin;
-    private final ScrollPaneMessage spm;
-    private final Format format;
     private final SimpleDateFormat sdf;
-    private final CreateName setName;
 
-    public CustomerHandler(MainDialog dialog, CreatePIN pin, ScrollPaneMessage spm,
-                           Format format, SimpleDateFormat sdf, CreateName setName) {
+
+    public CustomerHandler(MainDialog dialog, SimpleDateFormat sdf) {
         customers = new ArrayList<>();
         this.dialog = dialog;
-        this.pin = pin;
-        this.spm = spm;
-        this.format = format;
         this.sdf = sdf;
-        this.setName = setName;
     }
 
     public void createCustomer() {
         try {
-            String firstName = setName.setName("first name");
-            String lastName = setName.setName("last name");
-            String pin = this.pin.setPIN(false, dialog.getCustomerHandler(), dialog.getEmployeeHandler());
+            String firstName = CreateName.setName("first name");
+            String lastName = CreateName.setName("last name");
+            String pin = CreatePIN.setPIN(false, dialog.getCustomerHandler(), dialog.getEmployeeHandler());
             setCustomer(firstName, lastName, pin);
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(null, "customer was not created: " + e);
@@ -65,7 +57,7 @@ public class CustomerHandler {
             if (input == null) {
                 throw new IllegalArgumentException("canceled");
             }
-            input = format.formatPIN(input);
+            input = Format.formatPIN(input);
             Customer c = getCustomerWithPIN(input);
             if (c != null) {
                 return c;
@@ -108,14 +100,6 @@ public class CustomerHandler {
             JOptionPane.showMessageDialog(null, "there is no customers");
             return;
         }
-        spm.printMessage(allCustomers.toString(), "All customers", 400);
+        ScrollPaneMessage.printMessage(allCustomers.toString(), "All customers", 500);
     }
-
-
-
-
-
-
-
-
 }

@@ -1,7 +1,8 @@
 import javax.swing.*;
 
 public class CreatePIN {
-    public String setPIN(boolean customer, CustomerHandler customerHandler, EmployeeHandler employeeHandler) {
+
+    public static String setPIN(boolean customer, CustomerHandler customerHandler, EmployeeHandler employeeHandler) {
         while (true) {
             String input = JOptionPane.showInputDialog(null, "enter 10 digit personal identity number");
             if (input == null) {

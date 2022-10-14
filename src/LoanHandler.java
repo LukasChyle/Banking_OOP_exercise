@@ -7,23 +7,21 @@ public class LoanHandler {
 
     private final List<Loan> loans;
     private final MainDialog mainDialog;
-    private final CreateAccountID createID;
-    private final ScrollPaneMessage spm;
     private final SimpleDateFormat sdf;
 
-    public LoanHandler(MainDialog mainDialog, CreateAccountID createID,
-                       ScrollPaneMessage spm, SimpleDateFormat sdf) {
+    public LoanHandler(MainDialog mainDialog, SimpleDateFormat sdf) {
         loans = new ArrayList<>();
         this.mainDialog = mainDialog;
-        this.spm = spm;
         this.sdf = sdf;
-        this.createID = createID;
     }
 
     public void getCustomerLoans(Customer customer) {
-        List<Loan> loanList = getAllLoansWithPIN(customer.getPIN());
-        if (loanList.isEmpty()) {
-            JOptionPane.showMessageDialog(null, customer.getPIN() + " don't have any loans");
+        List<Loan> loanList;
+        try {
+            loanList = getAllLoansWithPIN(customer.getPIN());
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "error: " + e);
+            return;
         }
 
         Loan[] loanArray = loanList.toArray(Loan[]::new);
@@ -52,7 +50,7 @@ public class LoanHandler {
     }
 
     private String setLoan(Customer customer, double amount, double interest, String grantedBy) throws IllegalArgumentException {
-        String accountID = createID.setID(mainDialog.getAccountHandler(), mainDialog.getLoanHandler());
+        String accountID = CreateAccountID.setID(mainDialog.getAccountHandler(), mainDialog.getLoanHandler());
         java.util.Date date = new java.util.Date();
         loans.add(new Loan(accountID, customer.getPIN(), amount, interest, grantedBy, sdf.format(date)));
         return accountID;
@@ -112,7 +110,7 @@ public class LoanHandler {
             java.util.Date date = new java.util.Date();
             JOptionPane.showMessageDialog(null, "employee have to grant the change");
             try {
-                Employee employee =  mainDialog.getEmployeeHandler().getEmployee();
+                Employee employee = mainDialog.getEmployeeHandler().getEmployee();
                 if (employee == null) {
                     return;
                 }
@@ -129,28 +127,28 @@ public class LoanHandler {
 
     public void printPayments(Loan loan) {
         List<Transaction> transactions = loan.getTransactions();
-        StringBuilder sb = new StringBuilder();
-        for (Transaction t : transactions) {
-            sb.append(t).append("\n");
-        }
         if (transactions.isEmpty()) {
             JOptionPane.showMessageDialog(null, "there is no payments");
             return;
         }
-        spm.printMessage(sb.toString(), "All payments", 400);
+        StringBuilder sb = new StringBuilder();
+        for (Transaction t : transactions) {
+            sb.append(t).append("\n");
+        }
+        ScrollPaneMessage.printMessage(sb.toString(), "All payments", 400);
     }
 
     public void printInterestChanges(Loan loan) {
         List<InterestRateChange> interestChanges = loan.getInterestChanges();
-        StringBuilder sb = new StringBuilder();
-        for (InterestRateChange i : interestChanges) {
-            sb.append(i).append("\n");
-        }
         if (interestChanges.isEmpty()) {
             JOptionPane.showMessageDialog(null, "no changes have been made");
             return;
         }
-        spm.printMessage(sb.toString(), "All interest changes", 400);
+        StringBuilder sb = new StringBuilder();
+        for (InterestRateChange i : interestChanges) {
+            sb.append(i).append("\n");
+        }
+        ScrollPaneMessage.printMessage(sb.toString(), "All interest changes", 400);
     }
 
     public Loan getLoanWithID(String loanID) {
@@ -195,4 +193,33 @@ public class LoanHandler {
         return loanSum;
     }
 
+    public void printLoansGranted(Employee employee) {
+        StringBuilder sb = new StringBuilder();
+        for (Loan l : loans) {
+            if (l.getGrantedBy().equals(employee.getEmployeeID())){
+                sb.append(l).append("\n");
+            }
+        }
+        if (sb.isEmpty()) {
+            JOptionPane.showMessageDialog(null, employee.getEmployeeID() + " has not granted any loans");
+        } else {
+            ScrollPaneMessage.printMessage(sb.toString(), "All loans granted by " + employee.getEmployeeID(), 700);
+        }
+    }
+
+    public void printInterestChanges(Employee employee) {
+        StringBuilder sb = new StringBuilder();
+        for (Loan l : loans) {
+            for (InterestRateChange i : l.getInterestChanges()) {
+                if (i.grantedBy().equals(employee.getEmployeeID())) {
+                    sb.append(i).append("\n");
+                }
+            }
+        }
+        if (sb.isEmpty()) {
+            JOptionPane.showMessageDialog(null, employee.getEmployeeID() + " has not changed the interest of any loans");
+        } else {
+            ScrollPaneMessage.printMessage(sb.toString(), "All interest rates of loans changed by " + employee.getEmployeeID(), 400);
+        }
+    }
 }

@@ -3,7 +3,7 @@ import java.awt.*;
 
 public class ScrollPaneMessage {
 
-    public void printMessage(String message, String title, int width) {
+    public static void printMessage(String message, String title, int width) {
         JTextArea textArea = new JTextArea(message);
         JScrollPane scrollPane = new JScrollPane(textArea);
         textArea.setLineWrap(true);

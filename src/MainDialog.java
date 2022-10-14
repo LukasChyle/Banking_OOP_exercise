@@ -9,17 +9,11 @@ public class MainDialog {
     private final LoanHandler loanHandler;
 
     public MainDialog() {
-        CreatePIN createPIN = new CreatePIN();
-        CreateAccountID createID = new CreateAccountID();
-        ScrollPaneMessage spm = new ScrollPaneMessage();
-        Format format = new Format();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd '-' HH:mm");
-        CreateName setName = new CreateName();
-        customerHandler = new CustomerHandler(this, createPIN, spm, format, sdf, setName);
-        employeeHandler = new EmployeeHandler(this, createPIN, spm, format, sdf, setName);
-        accountHandler = new AccountHandler(this, createID, spm, sdf);
-        loanHandler = new LoanHandler(this, createID, spm, sdf);
-
+        customerHandler = new CustomerHandler(this, sdf);
+        employeeHandler = new EmployeeHandler(this, sdf);
+        accountHandler = new AccountHandler(this, sdf);
+        loanHandler = new LoanHandler(this, sdf);
 
         String[] options = {"Add Employee", "Add Customer", "Manage Employee", "Manage Customer",
                 "List Employees", "List Customers", "Accounts: change interest"};
@@ -89,20 +83,20 @@ public class MainDialog {
         }
     }
 
-
-    private void employeeDialog(Employee employee){ // not done
-
-        String[] options = {"Change salary", "Loans granted", };
-        String message = employee + "\nSalary: " + employee.getSalary();
+    private void employeeDialog(Employee employee){
+        String[] options = {"Change salary", "Loans granted", "Loans interest changed", "Return"};
         boolean run = true;
 
         while (run) {
+            String message = employee + "\nSalary: " + employee.getSalary();
             int action = JOptionPane.showOptionDialog(null, message, "Employee",
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
 
             switch (action) {
-                case -1, 6 -> run = false;
-
+                case -1, 3 -> run = false;
+                case 0 -> employeeHandler.changeSalary(employee);
+                case 1 -> loanHandler.printLoansGranted(employee);
+                case 2 -> loanHandler.printInterestChanges(employee);
             }
         }
     }

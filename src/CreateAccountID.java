@@ -2,7 +2,7 @@ import java.util.Random;
 
 public class CreateAccountID {
 
-    public String setID(AccountHandler accountHandler, LoanHandler loanHandler) {
+    public static String setID(AccountHandler accountHandler, LoanHandler loanHandler) {
         Random rnd = new Random();
         while (true) {
             StringBuilder id = new StringBuilder();

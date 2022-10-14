@@ -32,6 +32,6 @@ public class Employee extends Person {
     @Override
     public String toString() {
         return "  " + getFirstName() + " " + getLastName() +
-                ", personal id number: " + getPIN() + ", ID: " + employeeID + " , created: " + getDateCreated();
+                ", PIN: " + getPIN() + ", ID: " + employeeID + " , created: " + getDateCreated();
     }
 }

@@ -7,23 +7,21 @@ public class AccountHandler {
 
     private final List<Account> accounts;
     private final MainDialog mainDialog;
-    private final CreateAccountID createID;
-    private final ScrollPaneMessage spm;
     private final SimpleDateFormat sdf;
 
-    public AccountHandler(MainDialog mainDialog, CreateAccountID createID,
-                          ScrollPaneMessage spm, SimpleDateFormat sdf) {
+    public AccountHandler(MainDialog mainDialog, SimpleDateFormat sdf) {
         accounts = new ArrayList<>();
         this.mainDialog = mainDialog;
-        this.spm = spm;
         this.sdf = sdf;
-        this.createID = createID;
     }
 
     public void getCustomerAccounts(Customer customer) {
-        List<Account> accountList = getAllAccountsWithPIN(customer.getPIN());
-        if (accountList.isEmpty()) {
-            JOptionPane.showMessageDialog(null, customer.getPIN() + " don't have any accounts");
+        List<Account> accountList;
+        try {
+            accountList = getAllAccountsWithPIN(customer.getPIN());
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "error: " + e);
+            return;
         }
 
         Account[] accountArray = accountList.toArray(Account[]::new);
@@ -47,7 +45,7 @@ public class AccountHandler {
     }
 
     private String setAccount(Customer customer) throws IllegalArgumentException {
-        String accountID = createID.setID(mainDialog.getAccountHandler(), mainDialog.getLoanHandler());
+        String accountID = CreateAccountID.setID(mainDialog.getAccountHandler(), mainDialog.getLoanHandler());
         java.util.Date date = new java.util.Date();
         accounts.add(new Account(accountID, customer.getPIN(), sdf.format(date)));
         return accountID;
@@ -83,15 +81,15 @@ public class AccountHandler {
 
     public void printTransactions(Account account) {
         List<Transaction> transactions = account.getTransactions();
-        StringBuilder sb = new StringBuilder();
-        for (Transaction t : transactions) {
-            sb.append(t).append("\n");
-        }
         if (transactions.isEmpty()) {
             JOptionPane.showMessageDialog(null, "there is no transactions");
             return;
         }
-        spm.printMessage(sb.toString(), "All transactions", 400);
+        StringBuilder sb = new StringBuilder();
+        for (Transaction t : transactions) {
+            sb.append(t).append("\n");
+        }
+        ScrollPaneMessage.printMessage(sb.toString(), "All transactions", 400);
     }
 
     public Account getAccountWithID(String accountID) {
@@ -126,7 +124,7 @@ public class AccountHandler {
         return accountList;
     }
 
-    public double getAccountsSum(String pin){
+    public double getAccountsSum(String pin) {
         double balanceSum = 0;
         for (Account a : accounts) {
             if (a.getOwnerPIN().equals(pin)) {

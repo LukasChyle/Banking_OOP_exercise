@@ -9,30 +9,21 @@ public class EmployeeHandler {
     private final List<Employee> employees;
     private final Random rnd;
     private final MainDialog dialog;
-    private final CreatePIN pin;
-    private final ScrollPaneMessage spm;
-    private final Format format;
     private final SimpleDateFormat sdf;
-    private final CreateName setName;
 
-    public EmployeeHandler(MainDialog dialog, CreatePIN pin, ScrollPaneMessage spm,
-                           Format format, SimpleDateFormat sdf, CreateName setName) {
+    public EmployeeHandler(MainDialog dialog, SimpleDateFormat sdf) {
         employees = new ArrayList<>();
         rnd = new Random();
         this.dialog = dialog;
-        this.pin = pin;
-        this.spm = spm;
-        this.format = format;
         this.sdf = sdf;
-        this.setName = setName;
     }
 
 
     public void createEmployee() {
         try {
-            String firstName = setName.setName("first name");
-            String lastName = setName.setName("last name");
-            String pin = this.pin.setPIN(false, dialog.getCustomerHandler(), dialog.getEmployeeHandler());
+            String firstName = CreateName.setName("first name");
+            String lastName = CreateName.setName("last name");
+            String pin = CreatePIN.setPIN(false, dialog.getCustomerHandler(), dialog.getEmployeeHandler());
             double salary = setSalary();
             setEmployee(firstName, lastName, pin, salary);
         } catch (IllegalArgumentException e) {
@@ -46,6 +37,14 @@ public class EmployeeHandler {
         }
         java.util.Date date = new java.util.Date();
             employees.add(new Employee(firstName, lastName, pin, sdf.format(date), salary, getNewEmployeeID()));
+    }
+
+    public void changeSalary(Employee employee) {
+        try {
+            employee.setSalary(setSalary());
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "error: " + e);
+        }
     }
 
     private double setSalary() {
@@ -84,8 +83,8 @@ public class EmployeeHandler {
             if (input == null) {
                 throw new IllegalArgumentException("canceled");
             }
-            input = format.formatPIN(input);
-            input = format.formatID(input);
+            input = Format.formatPIN(input);
+            input = Format.formatID(input);
             Employee e = getEmployeeWithID(input);
             if (e == null) {
                 e = getEmployeeWithPIN(input);
@@ -151,7 +150,7 @@ public class EmployeeHandler {
             JOptionPane.showMessageDialog(null, "there is no employees");
             return;
         }
-        spm.printMessage(allEmployees.toString(), "All employees", 400);
+        ScrollPaneMessage.printMessage(allEmployees.toString(), "All employees", 500);
     }
 }
 
