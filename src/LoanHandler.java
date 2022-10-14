@@ -5,14 +5,60 @@ import java.util.List;
 
 public class LoanHandler {
 
-    private final List<Loan> loans;
+    private List<Loan> loans;
+    private List<Transaction> loanTransactions;
+    private List<InterestRateChange> interestChanges;
     private final MainDialog mainDialog;
     private final SimpleDateFormat sdf;
 
     public LoanHandler(MainDialog mainDialog, SimpleDateFormat sdf) {
-        loans = new ArrayList<>();
+        retrieveList();
+        retrieveTransactionList();
+        retrieveInterestChangesList();
         this.mainDialog = mainDialog;
         this.sdf = sdf;
+    }
+
+    private void storeList() {
+        ObjectFileStore.storeObjectList(loans, "loans");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void retrieveList() {
+        List<Loan> loanList = (List<Loan>) ObjectFileStore.retrieveObjectList("loans");
+        if (loanList != null) {
+            loans = loanList;
+        } else {
+            loans = new ArrayList<>();
+        }
+    }
+
+    private void storeTransactionList() {
+        ObjectFileStore.storeObjectList(loanTransactions, "loanTransactions");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void retrieveTransactionList() {
+        List<Transaction> transactionList = (List<Transaction>) ObjectFileStore.retrieveObjectList("loanTransactions");
+        if (transactionList != null) {
+            loanTransactions = transactionList;
+        } else {
+            loanTransactions = new ArrayList<>();
+        }
+    }
+
+    private void storeInterestChangesList() {
+        ObjectFileStore.storeObjectList(interestChanges, "interestChanges");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void retrieveInterestChangesList() {
+        List<InterestRateChange> interestChangesList = (List<InterestRateChange>) ObjectFileStore.retrieveObjectList("interestChanges");
+        if (interestChangesList != null) {
+            interestChanges = interestChangesList;
+        } else {
+            interestChanges = new ArrayList<>();
+        }
     }
 
     public void getCustomerLoans(Customer customer) {
@@ -42,18 +88,22 @@ public class LoanHandler {
             if (employee == null) {
                 return;
             }
-            String loanID = setLoan(customer, setLoanAmount(), setLoanInterest(), employee.getEmployeeID());
-            JOptionPane.showMessageDialog(null, "new loan created with ID: " + loanID);
+            java.util.Date date = new java.util.Date();
+            Loan loan = setLoan(customer, setLoanAmount(), setLoanInterest(), employee.getEmployeeID());
+            createInterestChange(loan, loan.getInterest(), sdf.format(date), loan.getGrantedBy());
+            storeInterestChangesList();
+            JOptionPane.showMessageDialog(null, "new loan created with ID: " + loan.getLoanID());
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(null, "loan not created: " + e);
         }
     }
 
-    private String setLoan(Customer customer, double amount, double interest, String grantedBy) throws IllegalArgumentException {
+    private Loan setLoan(Customer customer, double amount, double interest, String grantedBy) throws IllegalArgumentException {
         String accountID = CreateAccountID.setID(mainDialog.getAccountHandler(), mainDialog.getLoanHandler());
         java.util.Date date = new java.util.Date();
         loans.add(new Loan(accountID, customer.getPIN(), amount, interest, grantedBy, sdf.format(date)));
-        return accountID;
+        storeList();
+        return getLoanWithID(accountID);
     }
 
     private double setLoanAmount() {
@@ -76,7 +126,10 @@ public class LoanHandler {
             }
             java.util.Date date = new java.util.Date(); //updates the timeStamp
             try {
-                loan.makePayment(Double.parseDouble(input), sdf.format(date));
+                loan.makePayment(Double.parseDouble(input));
+                createTransaction(Double.parseDouble(input), loan, sdf.format(date));
+                storeTransactionList();
+                storeList();
                 return;
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "input not valid");
@@ -114,7 +167,10 @@ public class LoanHandler {
                 if (employee == null) {
                     return;
                 }
-                loan.makeInterestChange(Double.parseDouble(input) / 100, sdf.format(date), employee.getEmployeeID());
+                loan.makeInterestChange(Double.parseDouble(input) / 100);
+                createInterestChange(loan, (Double.parseDouble(input)/ 100), sdf.format(date), loan.getGrantedBy());
+                storeInterestChangesList();
+                storeList();
                 JOptionPane.showMessageDialog(null, "interest set to " + input + "%");
                 break;
             } catch (NumberFormatException e) {
@@ -126,7 +182,12 @@ public class LoanHandler {
     }
 
     public void printPayments(Loan loan) {
-        List<Transaction> transactions = loan.getTransactions();
+        List<Transaction> transactions = new ArrayList<>();
+        for (Transaction t : loanTransactions) {
+            if (t.id().equals(loan.getLoanID())) {
+                transactions.add(t);
+            }
+        }
         if (transactions.isEmpty()) {
             JOptionPane.showMessageDialog(null, "there is no payments");
             return;
@@ -136,19 +197,6 @@ public class LoanHandler {
             sb.append(t).append("\n");
         }
         ScrollPaneMessage.printMessage(sb.toString(), "All payments", 400);
-    }
-
-    public void printInterestChanges(Loan loan) {
-        List<InterestRateChange> interestChanges = loan.getInterestChanges();
-        if (interestChanges.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "no changes have been made");
-            return;
-        }
-        StringBuilder sb = new StringBuilder();
-        for (InterestRateChange i : interestChanges) {
-            sb.append(i).append("\n");
-        }
-        ScrollPaneMessage.printMessage(sb.toString(), "All interest changes", 400);
     }
 
     public Loan getLoanWithID(String loanID) {
@@ -196,30 +244,50 @@ public class LoanHandler {
     public void printLoansGranted(Employee employee) {
         StringBuilder sb = new StringBuilder();
         for (Loan l : loans) {
-            if (l.getGrantedBy().equals(employee.getEmployeeID())){
+            if (l.getGrantedBy().equals(employee.getEmployeeID())) {
                 sb.append(l).append("\n");
             }
         }
         if (sb.isEmpty()) {
             JOptionPane.showMessageDialog(null, employee.getEmployeeID() + " has not granted any loans");
         } else {
-            ScrollPaneMessage.printMessage(sb.toString(), "All loans granted by " + employee.getEmployeeID(), 700);
+            ScrollPaneMessage.printMessage(sb.toString(), "All loans granted by " + employee.getEmployeeID(), 750);
+        }
+    }
+
+    public void printInterestChanges(Loan loan) {
+        StringBuilder sb = new StringBuilder();
+        for (InterestRateChange i : interestChanges) {
+            if (i.id().equals(loan.getLoanID())) {
+                sb.append(i).append("\n");
+            }
+        }
+        if (sb.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "no changes have been made");
+        } else {
+            ScrollPaneMessage.printMessage(sb.toString(), "All interest changes", 500);
         }
     }
 
     public void printInterestChanges(Employee employee) {
         StringBuilder sb = new StringBuilder();
-        for (Loan l : loans) {
-            for (InterestRateChange i : l.getInterestChanges()) {
-                if (i.grantedBy().equals(employee.getEmployeeID())) {
-                    sb.append(i).append("\n");
-                }
+        for (InterestRateChange i : interestChanges) {
+            if (i.grantedBy().equals(employee.getEmployeeID())) {
+                sb.append(i).append("\n");
             }
         }
         if (sb.isEmpty()) {
             JOptionPane.showMessageDialog(null, employee.getEmployeeID() + " has not changed the interest of any loans");
         } else {
-            ScrollPaneMessage.printMessage(sb.toString(), "All interest rates of loans changed by " + employee.getEmployeeID(), 400);
+            ScrollPaneMessage.printMessage(sb.toString(), "All interest of loans changed by " + employee.getEmployeeID(), 500);
         }
+    }
+
+    private void createTransaction(double amount, Loan loan, String timestamp) {
+        loanTransactions.add(new Transaction(amount, loan.getLoanID(), timestamp));
+    }
+
+    public void createInterestChange(Loan loan, double interest, String timestamp, String grantedBy) {
+        interestChanges.add(new InterestRateChange(loan.getLoanID(), interest, timestamp, grantedBy));
     }
 }

@@ -9,10 +9,7 @@ public class Loan implements Serializable {
     private double amount;
     private double interest;
     private final String grantedBy;
-    private final List<InterestRateChange> interestChanges;
-    private final List<Transaction> transactions;
     private final String ownerPIN;
-
     private final String dateCreated;
 
     public Loan(String loanID, String ownerPIN, double amount, double interest, String grantedBy, String timestamp) {
@@ -25,23 +22,12 @@ public class Loan implements Serializable {
         } else if (grantedBy.length() != 7) {
             throw new IllegalArgumentException("employeeID is not valid");
         }
-        interestChanges = new ArrayList<>();
-        transactions = new ArrayList<>();
         this.loanID = loanID;
         this.ownerPIN = ownerPIN;
         this.amount = amount;
         this.interest = interest;
         this.grantedBy = grantedBy;
         dateCreated = timestamp;
-        interestChanges.add(new InterestRateChange(interest, timestamp, grantedBy));
-    }
-
-    public List<InterestRateChange> getInterestChanges() {
-        return Collections.unmodifiableList(interestChanges);
-    }
-
-    public List<Transaction> getTransactions() {
-        return Collections.unmodifiableList(transactions);
     }
 
     public String getLoanID() {
@@ -68,24 +54,22 @@ public class Loan implements Serializable {
         return dateCreated;
     }
 
-    public void makeInterestChange(double interest, String timestamp, String grantedBy) {
-        interestChanges.add(new InterestRateChange(interest, timestamp, grantedBy));
+    public void makeInterestChange(double interest) {
         this.interest = interest;
     }
 
-    public void makePayment(double amount, String timestamp) {
+    public void makePayment(double amount) {
         if ((this.amount + amount) < 0) {
             throw new IllegalArgumentException("Can't pay more then the current loan sum");
         } else if (amount <= 0) {
             throw new IllegalArgumentException("Can't withdraw money from the loan");
         }
-        transactions.add(new Transaction(amount, timestamp));
         this.amount -= amount;
     }
 
     @Override
     public String toString() {
-        return "  ID: " + loanID + " , owner: " + ownerPIN + " , granted by: " + grantedBy +
-                " , amount: " + amount + " , interest: " + (interest * 100) + " , created: " + dateCreated + "  ";
+        return "  ID: " + loanID + "  -  owner: " + ownerPIN + "  -  granted by: " + grantedBy +
+                "  -  amount: " + amount + "  -  interest: " + (interest * 100) + "%  -  created: " + dateCreated + "  ";
     }
 }

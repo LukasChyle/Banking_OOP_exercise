@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -6,27 +7,46 @@ import java.util.List;
 public class AccountHandler {
 
     private List<Account> accounts;
+    private List<Transaction> accountTransactions;
     private final MainDialog mainDialog;
     private final SimpleDateFormat sdf;
 
     public AccountHandler(MainDialog mainDialog, SimpleDateFormat sdf) {
-        accounts = new ArrayList<>();
-        retrieveList();
+        retrieveAccountList();
+        retrieveTransactionList();
+        retrieveAccountInterest();
         this.mainDialog = mainDialog;
         this.sdf = sdf;
     }
 
-    private void storeList() {
-        ObjectFileStore.storeObjects(accounts, "accounts");
+    private void storeAccountList() {
+        ObjectFileStore.storeObjectList(accounts, "accounts");
     }
 
     @SuppressWarnings("unchecked")
-    private void retrieveList() {
-        List<Account> accountList = (List<Account>) ObjectFileStore.retrieveObjects("accounts");
+    private void retrieveAccountList() {
+        List<Account> accountList = (List<Account>) ObjectFileStore.retrieveObjectList("accounts");
         if (accountList != null) {
             accounts = accountList;
+        } else {
+            accounts = new ArrayList<>();
         }
     }
+
+    private void storeTransactionList() {
+        ObjectFileStore.storeObjectList(accountTransactions, "accountTransactions");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void retrieveTransactionList() {
+        List<Transaction> transactionList = (List<Transaction>) ObjectFileStore.retrieveObjectList("accountTransactions");
+        if (transactionList != null) {
+            accountTransactions = transactionList;
+        } else {
+            accountTransactions = new ArrayList<>();
+        }
+    }
+
 
     public void getCustomerAccounts(Customer customer) {
         List<Account> accountList;
@@ -61,7 +81,7 @@ public class AccountHandler {
         String accountID = CreateAccountID.setID(mainDialog.getAccountHandler(), mainDialog.getLoanHandler());
         java.util.Date date = new java.util.Date();
         accounts.add(new Account(accountID, customer.getPIN(), sdf.format(date)));
-        storeList();
+        storeAccountList();
         return accountID;
     }
 
@@ -80,10 +100,14 @@ public class AccountHandler {
 
             try {
                 if (deposit) {
-                    account.makeTransaction(Double.parseDouble(input), sdf.format(date)); // adds
+                    account.makeTransaction(Double.parseDouble(input)); // adds
+                    createTransaction(Double.parseDouble(input), account, sdf.format(date));
+                    storeTransactionList();
                     return;
                 }
-                account.makeTransaction(-Double.parseDouble(input), sdf.format(date)); // subtracts
+                account.makeTransaction(-Double.parseDouble(input)); // subtracts
+                createTransaction(Double.parseDouble(input), account, sdf.format(date));
+                storeTransactionList();
                 return;
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "input not valid");
@@ -94,7 +118,12 @@ public class AccountHandler {
     }
 
     public void printTransactions(Account account) {
-        List<Transaction> transactions = account.getTransactions();
+        List<Transaction> transactions = new ArrayList<>();
+        for (Transaction t : accountTransactions) {
+            if (t.id().equals(account.getAccountID())) {
+                transactions.add(t);
+            }
+        }
         if (transactions.isEmpty()) {
             JOptionPane.showMessageDialog(null, "there is no transactions");
             return;
@@ -157,12 +186,34 @@ public class AccountHandler {
             }
             try {
                 Account.setInterest(Double.parseDouble(input) / 100);
-                storeList();
+                storeAccountInterest();
+                storeAccountList();
                 JOptionPane.showMessageDialog(null, "interest set to " + input + "%");
                 break;
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "interest input not valid");
             }
+        }
+    }
+
+    private void createTransaction(double amount, Account account, String timestamp) {
+        accountTransactions.add(new Transaction(amount, account.getAccountID(), timestamp));
+    }
+
+    private void storeAccountInterest() {
+        try (ObjectOutputStream objOPS = new ObjectOutputStream(new FileOutputStream("accountInterest.ser"))) {
+            objOPS.writeDouble(Account.getInterest());
+            objOPS.flush();
+        } catch (IOException e) {
+            System.out.println("Error: " + e);
+        }
+    }
+
+    private void retrieveAccountInterest() {
+        try (ObjectInputStream objIPS = new ObjectInputStream(new FileInputStream("accountInterest.ser"))) {
+            Account.setInterest(objIPS.readDouble());
+        } catch (IOException e) {
+            System.out.println("Error: " + e);
         }
     }
 }

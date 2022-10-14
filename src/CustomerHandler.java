@@ -5,15 +5,29 @@ import java.util.List;
 
 public class CustomerHandler {
 
-    private final List<Customer> customers;
+    private List<Customer> customers;
     private final MainDialog dialog;
     private final SimpleDateFormat sdf;
 
 
     public CustomerHandler(MainDialog dialog, SimpleDateFormat sdf) {
-        customers = new ArrayList<>();
+        retrieveList();
         this.dialog = dialog;
         this.sdf = sdf;
+    }
+
+    private void storeList() {
+        ObjectFileStore.storeObjectList(customers, "customers");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void retrieveList() {
+        List<Customer> customerList = (List<Customer>) ObjectFileStore.retrieveObjectList("customers");
+        if (customerList != null) {
+            customers = customerList;
+        } else {
+            customers = new ArrayList<>();
+        }
     }
 
     public void createCustomer() {
@@ -33,6 +47,7 @@ public class CustomerHandler {
         }
         java.util.Date date = new java.util.Date(); //updates the timeStamp
         customers.add(new Customer(firstName, lastName, pin, sdf.format(date)));
+        storeList();
     }
 
     public Customer getCustomer() {

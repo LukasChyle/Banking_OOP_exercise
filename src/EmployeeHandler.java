@@ -6,18 +6,31 @@ import java.util.Random;
 
 public class EmployeeHandler {
 
-    private final List<Employee> employees;
+    private List<Employee> employees;
     private final Random rnd;
     private final MainDialog dialog;
     private final SimpleDateFormat sdf;
 
     public EmployeeHandler(MainDialog dialog, SimpleDateFormat sdf) {
-        employees = new ArrayList<>();
+        retrieveList();
         rnd = new Random();
         this.dialog = dialog;
         this.sdf = sdf;
     }
 
+    private void storeList() {
+        ObjectFileStore.storeObjectList(employees, "employees");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void retrieveList() {
+        List<Employee> employeeList = (List<Employee>) ObjectFileStore.retrieveObjectList("employees");
+        if (employeeList != null) {
+            employees = employeeList;
+        } else {
+            employees = new ArrayList<>();
+        }
+    }
 
     public void createEmployee() {
         try {
@@ -37,11 +50,13 @@ public class EmployeeHandler {
         }
         java.util.Date date = new java.util.Date();
             employees.add(new Employee(firstName, lastName, pin, sdf.format(date), salary, getNewEmployeeID()));
+        storeList();
     }
 
     public void changeSalary(Employee employee) {
         try {
             employee.setSalary(setSalary());
+            storeList();
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(null, "error: " + e);
         }

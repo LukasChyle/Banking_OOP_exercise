@@ -3,7 +3,7 @@ import java.util.List;
 
 public class ObjectFileStore {
 
-    public static void storeObjects(List<?> objectList, String fileName){
+    public static void storeObjectList(List<?> objectList, String fileName){
         try (ObjectOutputStream objOPS = new ObjectOutputStream(new FileOutputStream(fileName.trim() + ".ser"))) {
             objOPS.writeObject(objectList);
             objOPS.flush();
@@ -12,7 +12,7 @@ public class ObjectFileStore {
         }
     }
 
-    public static List<?> retrieveObjects(String fileName){
+    public static List<?> retrieveObjectList(String fileName){
         try (ObjectInputStream objIPS = new ObjectInputStream(new FileInputStream(fileName.trim() + ".ser"))) {
             return (List<?>) objIPS.readObject();
         } catch (IOException | ClassNotFoundException e) {

@@ -1,11 +1,7 @@
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Account implements Serializable {
 
-    private final List<Transaction> transactions;
     private final String accountID;
     private double balance;
     private static double interest;
@@ -18,7 +14,6 @@ public class Account implements Serializable {
         } else if (String.valueOf(ownerPIN).length() != 11) {
             throw new IllegalArgumentException("social security number is not valid");
         }
-        transactions = new ArrayList<>();
         this.accountID = accountID;
         this.ownerPIN = ownerPIN;
         dateCreated = timestamp;
@@ -26,10 +21,6 @@ public class Account implements Serializable {
 
     public static void setInterest(double interest) {
         Account.interest = interest;
-    }
-
-    public List<Transaction> getTransactions() {
-        return Collections.unmodifiableList(transactions);
     }
 
     public String getAccountID() {
@@ -52,17 +43,16 @@ public class Account implements Serializable {
         return dateCreated;
     }
 
-    public void makeTransaction(double amount, String timestamp) {
+    public void makeTransaction(double amount) {
         if ((amount + balance) < 0) {
             throw new IllegalArgumentException("Can't withdraw more then the account balance");
         }
         balance += amount;
-        transactions.add(new Transaction(amount, timestamp));
     }
 
     @Override
     public String toString() {
-        return "  ID: " + accountID + " , owner: " + ownerPIN + " , balance: " + balance +
-                " , interest: " + (interest * 100) + "% , created: " + dateCreated + "  ";
+        return "  ID: " + accountID + "  -  owner: " + ownerPIN + "  -  balance: " + balance +
+                "  -  interest: " + (interest * 100) + "%  -  created: " + dateCreated + "  ";
     }
 }

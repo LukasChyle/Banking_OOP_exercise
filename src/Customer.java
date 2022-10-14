@@ -8,6 +8,6 @@ public class Customer extends Person {
     @Override
     public String toString() {
         return "  " + getFirstName() + " " + getLastName() +
-                ", PIN: " + getPIN() + " , created: " + getDateCreated();
+                "  -  PIN: " + getPIN() + "  -  created: " + getDateCreated();
     }
 }

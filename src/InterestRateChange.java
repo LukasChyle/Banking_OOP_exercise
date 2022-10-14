@@ -1,9 +1,9 @@
 import java.io.Serializable;
 
-public record InterestRateChange(double interest, String timestamp, String grantedBy) implements Serializable {
+public record InterestRateChange(String id, double interest, String timestamp, String grantedBy) implements Serializable {
 
     @Override
     public String toString() {
-        return "  interest set to " + (interest * 100) + "% , granted by " + grantedBy + " , " + timestamp + "  ";
+        return "  Acc: " + id + "  -  interest: " + (interest * 100) + "%  -  granted by: " + grantedBy + "  -  " + timestamp + "  ";
     }
 }
